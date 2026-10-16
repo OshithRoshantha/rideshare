@@ -7,7 +7,7 @@ night at cut-off; drivers run the trip; the platform takes a commission plus a b
 > "RideShare Route" is just the working name — it lives in one place: `APP_NAME` in
 > [`backend/app/config.py`](backend/app/config.py) and [`frontend/src/lib/config.ts`](frontend/src/lib/config.ts).
 
-**Live demo:** https://oshithroshantha.github.io/rideshare-route/ (frontend on GitHub Pages, API on Railway).
+**Live demo:** https://oshithroshantha.github.io/rideshare/ (frontend on GitHub Pages, API on Railway).
 See [Demo accounts](#demo-accounts) below to log in. The free Railway backend may take ~10–20s to wake up
 after being idle, and its data resets on redeploy (it auto-reseeds on cold start).
 
@@ -125,7 +125,7 @@ needs a separate host):
 ## Project structure
 
 ```
-rideshare-route/
+rideshare/
 ├── backend/            # FastAPI app, services, routers, seed script, tests
 ├── frontend/            # React + Vite + TypeScript app
 ├── render.yaml          # Backend deploy blueprint (Render)
