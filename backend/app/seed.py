@@ -60,8 +60,16 @@ CORRIDORS = [
 
 
 def reset_data(data_dir: str):
+    # Clear the directory's contents rather than removing the directory itself —
+    # data_dir may be a mounted volume, and rmtree-ing a mount point raises
+    # "Device or resource busy".
     if os.path.exists(data_dir):
-        shutil.rmtree(data_dir)
+        for entry in os.listdir(data_dir):
+            path = os.path.join(data_dir, entry)
+            if os.path.isdir(path) and not os.path.islink(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
     os.makedirs(data_dir, exist_ok=True)
 
 
