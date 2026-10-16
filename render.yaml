@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: rideshare-route-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_DAYS
+        value: "7"
+      - key: TIMEZONE
+        value: Asia/Colombo
+      - key: DATA_DIR
+        value: ./data
+      - key: NOMINATIM_BASE_URL
+        value: https://nominatim.openstreetmap.org
+      - key: OSRM_BASE_URL
+        value: https://router.project-osrm.org
+      - key: GEO_USER_AGENT
+        value: "RideShareRoute-MVP/0.1 (contact@example.com)"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    disk:
+      name: rideshare-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1
