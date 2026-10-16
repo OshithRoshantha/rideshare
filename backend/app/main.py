@@ -2,8 +2,9 @@ from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.core.time_utils import now
@@ -58,6 +59,14 @@ def create_app() -> FastAPI:
     @app.get("/api/health")
     def health():
         return {"status": "ok", "app": settings.app_name}
+
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        # ApiError puts a flat {"detail": ..., "code": ...} dict in exc.detail — return it
+        # as the body as-is, instead of FastAPI's default of nesting it under another
+        # "detail" key (which would produce {"detail": {"detail": ..., "code": ...}}).
+        body = exc.detail if isinstance(exc.detail, dict) else {"detail": exc.detail}
+        return JSONResponse(status_code=exc.status_code, content=body, headers=exc.headers)
 
     return app
 
