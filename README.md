@@ -7,6 +7,10 @@ night at cut-off; drivers run the trip; the platform takes a commission plus a b
 > "RideShare Route" is just the working name — it lives in one place: `APP_NAME` in
 > [`backend/app/config.py`](backend/app/config.py) and [`frontend/src/lib/config.ts`](frontend/src/lib/config.ts).
 
+**Live demo:** https://oshithroshantha.github.io/rideshare-route/ (frontend on GitHub Pages, API on Railway).
+See [Demo accounts](#demo-accounts) below to log in. The free Railway backend may take ~10–20s to wake up
+after being idle, and its data resets on redeploy (it auto-reseeds on cold start).
+
 ## Stack
 
 - **Backend:** Python 3.11+, FastAPI, Pydantic v2, JSON-file storage (no DB server), APScheduler for the
@@ -94,25 +98,29 @@ The login page also shows one-tap demo-login buttons in dev mode.
 
 ## Deployment
 
-This repo deploys as two independent pieces:
+This repo deploys as two independent pieces (GitHub Pages cannot host a FastAPI process, so the backend
+needs a separate host):
 
 - **Frontend → GitHub Pages**, via [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
-  Pushing to `main` builds `frontend/` and publishes it automatically.
-- **Backend → Render** (or any host that runs a long-lived Python process + persistent disk — GitHub Pages
-  cannot host a FastAPI app). A [`render.yaml`](render.yaml) blueprint is included.
+  Pushing to `main` (or running the workflow manually) builds `frontend/` with the `VITE_API_URL` repo
+  variable baked in and publishes it.
+- **Backend → Railway** (currently deployed at `rideshare-route-api-production-404d.up.railway.app`). A
+  [`render.yaml`](render.yaml) blueprint is also included if you'd rather use Render instead — same
+  `backend/` app, either host works since it's just a process + `requirements.txt` + `start.sh`.
 
-### One-time setup
+### Re-deploying yourself / pointing at a different backend host
 
-1. **Deploy the backend on Render:**
-   - New → Blueprint → point at this repo → Render reads `render.yaml` and provisions the API with a
-     persistent disk for `backend/data/`.
-   - Note the resulting URL (e.g. `https://rideshare-route-api.onrender.com`).
-2. **Point the frontend at it:** in the GitHub repo, go to Settings → Secrets and variables → Actions →
-   Variables, and add `VITE_API_URL` = `https://<your-render-url>/api`.
-3. **Enable Pages:** Settings → Pages → Source = "GitHub Actions". The next push to `main` (or a manual
-   run of the workflow) builds and deploys the frontend.
-4. Free Render instances spin down when idle — the first request after a quiet period can take ~30–50s to
-   wake up.
+1. Deploy `backend/` to your host of choice (Railway, Render, Fly, a VPS — anything that runs
+   `pip install -r requirements.txt` then `bash start.sh`, which seeds demo data on first boot if
+   `backend/data/` is empty and otherwise just starts `uvicorn`). Set the env vars from
+   `backend/.env.example`.
+2. In the GitHub repo: Settings → Secrets and variables → Actions → Variables → set `VITE_API_URL` to
+   `https://<your-backend-url>/api`.
+3. Settings → Pages → Source = "GitHub Actions" (already enabled on this repo).
+4. Re-run the "Deploy frontend to GitHub Pages" workflow (or push to `main`).
+5. Free tiers on most hosts spin down when idle — the first request after a quiet period can take
+   10–50s to wake up, and ephemeral filesystems mean demo data reseeds on every cold start/redeploy unless
+   you attach a persistent volume/disk.
 
 ## Project structure
 
